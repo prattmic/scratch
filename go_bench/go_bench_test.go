@@ -7,10 +7,72 @@ package go_bench
 import (
 	"fmt"
 	"reflect"
+	"strconv"
 	"testing"
 )
 
-func BenchmarkMap(b *testing.B) {
+func fibonacci(n int) int {
+	prev2 := 0
+	prev1 := 1
+	if n == 0 {
+		return prev2
+	}
+	if n == 1 {
+		return prev1
+	}
+	var next int
+	for i := 2; i <= n; i++ {
+		next = prev1 + prev2
+		prev2 = prev1
+		prev1 = next
+	}
+
+	return next
+}
+
+func TestFibonacci(t *testing.T) {
+	for _, tc := range []struct {
+		n    int
+		want int
+	}{
+		{
+			n:    0,
+			want: 0,
+		},
+		{
+			n:    1,
+			want: 1,
+		},
+		{
+			n:    2,
+			want: 1,
+		},
+		{
+			n:    3,
+			want: 2,
+		},
+		{
+			n:    14,
+			want: 377,
+		},
+	} {
+		t.Run(strconv.Itoa(tc.n), func(t *testing.T) {
+			if got := fibonacci(tc.n); got != tc.want {
+				t.Errorf("fibonacci(%d) = %d want %d", tc.n, got, tc.want)
+			}
+		})
+	}
+}
+
+var a int = 64
+
+func BenchmarkConsistent(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		fibonacci(a)
+	}
+}
+
+func DisabledBenchmarkMap(b *testing.B) {
 	type V *int
 	value := reflect.ValueOf((V)(nil))
 	stringKeys := []string{}
